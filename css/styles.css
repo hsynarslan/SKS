@@ -1,20 +1,29 @@
-/* Spor Rezervasyon — tasarım dili: düz yüzeyler, gradyan/gölge yok, 400/500 ağırlık */
+/* SKS Rezervasyon Sistemi — Yaşar Üniversitesi kurumsal teması. Düz yüzeyler, gradyan/gölge yok, 400/500 ağırlık */
 :root {
-  --bg: #f7f6f2;
+  /* Yaşar Üniversitesi kurumsal renkleri (Kurumsal Kimlik Kılavuzu):
+     Yaşar laciverti #00448F · web sitesi laciverti #183249 · web sitesi grisi #768985 · sarı #FFB901 */
+  --brand: #00448f;
+  --brand-dark: #183249;
+  --brand-gray: #768985;
+  --brand-yellow: #ffb901;
+
+  --bg: #f4f6f8;
   --surface: #ffffff;
-  --surface-2: #f1efe8;
-  --border: #e3e0d6;
-  --text: #2c2c2a;
-  --text-2: #6b6a63;
-  --accent: #185fa5;
-  --accent-soft: #e6f1fb;
+  --surface-2: #edf1f4;
+  --border: #dbe1e6;
+  --border-strong: #c3ccd3;
+  --text: #183249;
+  --text-2: #56666f;
+  --accent: var(--brand);
+  --accent-hover: #003672;
+  --accent-soft: #e5edf7;
   --success: #1d9e75;
   --success-soft: #e1f5ee;
   --success-ink: #0f6e51;
   --danger: #a32d2d;
   --danger-soft: #fcebeb;
-  --warning: #854f0b;
-  --warning-soft: #faeeda;
+  --warning: #7a5500;
+  --warning-soft: #fff3cc;
   --r-ctl: 8px;
   --r-card: 12px;
   --hair: 0.5px solid var(--border);
@@ -40,41 +49,46 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---------- Üst menü ---------- */
 .topnav {
-  background: var(--surface);
-  border-bottom: var(--hair);
+  background: var(--brand-dark); color: #fff;
+  border-bottom: 3px solid var(--brand-yellow);
   position: sticky; top: 0; z-index: 10;
 }
 .topnav-inner {
-  max-width: 960px; margin: 0 auto;
+  max-width: 1120px; margin: 0 auto;
   display: flex; align-items: center; gap: 16px;
   padding: 10px 16px;
 }
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 500; white-space: nowrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 500; white-space: nowrap; color: inherit; text-decoration: none; line-height: 1.2; }
+.brand small { display: block; font-weight: 400; font-size: 12px; opacity: .75; }
 .brand-mark {
-  width: 32px; height: 32px; border-radius: var(--r-ctl);
-  background: var(--accent-soft); color: var(--accent);
-  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: var(--r-ctl);
+  background: var(--brand-yellow); color: var(--brand-dark);
+  display: grid; place-items: center; flex: none;
 }
 .nav { display: flex; gap: 2px; flex: 1; overflow-x: auto; scrollbar-width: none; }
 .nav::-webkit-scrollbar { display: none; }
 .nav a {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 10px; border-radius: var(--r-ctl);
-  color: var(--text-2); text-decoration: none; white-space: nowrap;
+  color: rgba(255, 255, 255, .78); text-decoration: none; white-space: nowrap;
+  box-shadow: inset 0 -2px 0 transparent;
 }
-.nav a:hover { background: var(--surface-2); color: var(--text); }
-.nav a.active { background: var(--accent-soft); color: var(--accent); }
+.nav a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.nav a.active { color: #fff; background: rgba(255, 255, 255, .1); box-shadow: inset 0 -2px 0 var(--brand-yellow); border-radius: var(--r-ctl) var(--r-ctl) 0 0; }
 .nav .count {
-  background: var(--warning-soft); color: var(--warning);
+  background: var(--brand-yellow); color: var(--brand-dark);
   border-radius: 999px; padding: 0 7px; font-size: 12px; font-weight: 500;
 }
 .userbox { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .userbox .who { text-align: right; line-height: 1.25; }
-.userbox .who small { display: block; color: var(--text-2); font-size: 12px; }
+.userbox .who small { display: block; color: rgba(255, 255, 255, .7); font-size: 12px; }
+.topnav .btn-ghost { color: rgba(255, 255, 255, .85); }
+.topnav .btn-ghost:hover { background: rgba(255, 255, 255, .1); color: #fff; }
 
 @media (max-width: 720px) {
   .topnav-inner { flex-wrap: wrap; row-gap: 8px; }
   .nav { order: 3; flex-basis: 100%; margin: 0 -4px; }
+  .brand small { display: none; }
   .userbox { margin-left: auto; }
   .userbox .who small { display: none; }
 }
@@ -101,7 +115,7 @@ main.narrow { max-width: 640px; }
   width: 100%; min-height: 40px;
   padding: 8px 12px;
   background: var(--surface);
-  border: var(--hair); border-color: #cfcbbf;
+  border: var(--hair); border-color: var(--border-strong);
   border-radius: var(--r-ctl);
   outline: none;
 }
@@ -133,8 +147,8 @@ textarea.input { min-height: 72px; resize: vertical; }
 }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:not(:disabled):hover { background: #134d86; }
-.btn-outline { border-color: #cfcbbf; color: var(--text); }
+.btn-primary:not(:disabled):hover { background: var(--accent-hover); }
+.btn-outline { border-color: var(--border-strong); color: var(--text); }
 .btn-outline:hover { background: var(--surface-2); }
 .btn-success { background: var(--success); color: #fff; }
 .btn-success:hover { background: #17845f; }
@@ -169,11 +183,19 @@ textarea.input { min-height: 72px; resize: vertical; }
 .alert-danger  { background: var(--danger-soft);  color: var(--danger); }
 
 /* ---------- Giriş ---------- */
-.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
-.login { width: 100%; max-width: 380px; }
-.login-head { text-align: center; margin-bottom: 24px; }
-.login-head .brand-mark { width: 48px; height: 48px; margin: 0 auto 12px; }
-.login-head .brand-mark .ti { font-size: 26px; }
+.login-wrap {
+  min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+  background: linear-gradient(var(--brand-dark), var(--brand-dark)) top / 100% 42vh no-repeat, var(--bg);
+}
+.login { width: 100%; max-width: 400px; padding: 0; overflow: hidden; }
+.login-head {
+  text-align: center; padding: 24px 24px 20px;
+  border-bottom: 3px solid var(--brand-yellow);
+}
+.login-head .uni { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--brand); font-weight: 500; margin-bottom: 12px; }
+.login-head .brand-mark { width: 52px; height: 52px; margin: 0 auto 12px; }
+.login-head .brand-mark .ti { font-size: 28px; }
+.login-body { padding: 20px 24px 24px; }
 .demo-hint {
   margin-top: 16px; padding: 10px 12px;
   background: var(--surface-2); border-radius: var(--r-ctl);
@@ -212,7 +234,7 @@ textarea.input { min-height: 72px; resize: vertical; }
 .chips {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   min-height: 40px; padding: 5px 6px;
-  border: 0.5px solid #cfcbbf; border-radius: var(--r-ctl); background: var(--surface);
+  border: 0.5px solid var(--border-strong); border-radius: var(--r-ctl); background: var(--surface);
   cursor: text;
 }
 .chips:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -225,7 +247,7 @@ textarea.input { min-height: 72px; resize: vertical; }
   border: 0; background: transparent; color: inherit; cursor: pointer;
   width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; padding: 0;
 }
-.chip button:hover { background: #cfe3f6; }
+.chip button:hover { background: #d3e0f0; }
 .chips input { flex: 1; min-width: 120px; border: 0; outline: none; padding: 4px 6px; background: transparent; }
 .hint { font-size: 13px; color: var(--text-2); display: flex; gap: 6px; align-items: center; }
 
@@ -242,7 +264,7 @@ textarea.input { min-height: 72px; resize: vertical; }
 .row-card .side { display: grid; gap: 6px; justify-items: end; }
 .empty {
   text-align: center; padding: 40px 20px; color: var(--text-2);
-  border: 0.5px dashed #cfcbbf; border-radius: var(--r-card);
+  border: 0.5px dashed var(--border-strong); border-radius: var(--r-card);
 }
 .empty .ti { font-size: 32px; display: block; margin: 0 auto 8px; }
 
@@ -253,7 +275,7 @@ textarea.input { min-height: 72px; resize: vertical; }
 .waiver-meter { display: inline-flex; align-items: center; gap: 6px; }
 .meter { width: 60px; height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
 .meter i { display: block; height: 100%; background: var(--success); }
-.meter.partial i { background: #d99a3a; }
+.meter.partial i { background: var(--brand-yellow); }
 
 /* ---------- İstatistik ---------- */
 .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
@@ -320,7 +342,7 @@ select.cal-room { width: auto; min-width: 200px; }
 .sw-pend { background: var(--warning-soft); border: 1px dashed var(--warning); }
 .sw-load { background: var(--accent-soft); border-color: var(--accent); }
 .sw-free { background: var(--surface); }
-.sw-closed, .cal-closed { background: repeating-linear-gradient(135deg, var(--surface-2) 0 5px, #e9e6dc 5px 10px); }
+.sw-closed, .cal-closed { background: repeating-linear-gradient(135deg, var(--surface-2) 0 5px, #e2e7eb 5px 10px); }
 
 .cal-scroll { overflow-x: auto; }
 .cal {
@@ -347,11 +369,11 @@ select.cal-room { width: auto; min-width: 200px; }
   background-image: linear-gradient(var(--border) 0.5px, transparent 0.5px);
   background-size: 100% 44px;
 }
-.cal-col:hover { background-color: #fbfaf7; }
-.cal-col.today { background-color: #fbfdff; }
+.cal-col:hover { background-color: #f8fafb; }
+.cal-col.today { background-color: #f7faff; }
 .cal-closed { position: absolute; left: 0; right: 0; display: flex; align-items: center; justify-content: center; cursor: not-allowed; }
 .cal-closed span { font-size: 12px; color: var(--text-2); background: var(--surface-2); padding: 2px 8px; border-radius: 999px; display: inline-flex; gap: 4px; align-items: center; text-align: center; }
-.cal-past { position: absolute; left: 0; right: 0; background: rgba(247, 246, 242, .55); pointer-events: none; }
+.cal-past { position: absolute; left: 0; right: 0; background: rgba(244, 246, 248, .6); pointer-events: none; }
 .cal-now { position: absolute; left: 0; right: 0; border-top: 1.5px solid var(--danger); pointer-events: none; z-index: 1; }
 .cal-now::before { content: ""; position: absolute; left: -4px; top: -4.5px; width: 7px; height: 7px; border-radius: 50%; background: var(--danger); }
 .cal-ev, .cal-load {
@@ -378,3 +400,8 @@ select.cal-room { width: auto; min-width: 200px; }
   .seg, select.cal-room { width: 100%; }
   .seg button { flex: 1; justify-content: center; }
 }
+
+/* ---------- Alt bilgi ---------- */
+.footer { max-width: 1120px; margin: 0 auto; padding: 0 16px 32px; color: var(--text-2); font-size: 13px; display: flex; gap: 6px 16px; flex-wrap: wrap; justify-content: space-between; }
+.footer strong { font-weight: 500; color: var(--brand); }
+@media (max-width: 440px) { .userbox .who { display: none; } }

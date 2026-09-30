@@ -1,4 +1,4 @@
-/* Spor Rezervasyon — tıklanabilir prototip.
+/* SKS Rezervasyon Sistemi (Yaşar Üniversitesi) — tıklanabilir prototip.
  * Veriler tarayıcıda (localStorage) tutulur; gerçek sistemde SSO ve sunucu API'si ile değiştirilir.
  * Durum makinesi: PENDING → APPROVED → COMPLETED, ya da REJECTED / CANCELLED. */
 (function () {
@@ -102,14 +102,15 @@
 
   function render() {
     const app = $("#app");
-    if (!me()) { app.innerHTML = loginView(); bindLogin(); document.title = "Giriş · Spor Rezervasyon"; return; }
+    if (!me()) { app.innerHTML = loginView(); bindLogin(); document.title = "Giriş · SKS Rezervasyon Sistemi"; return; }
     let key = location.hash.slice(1) || "home";
     if (!ROUTES[key] || !ROUTES[key].roles.includes(me().role)) key = "home";
     // Feragatname imzalanmadan hiçbir ekrana geçilemez
     if (!me().waiver && key !== "waiver") key = "waiver";
     const r = ROUTES[key];
-    document.title = `${r.title} · Spor Rezervasyon`;
-    app.innerHTML = navView(key) + `<main class="${key === "waiver" || key === "new" || key === "home" ? "narrow" : key === "calendar" ? "wide" : ""}">${r.render()}</main>`;
+    document.title = `${r.title} · SKS Rezervasyon Sistemi`;
+    app.innerHTML = navView(key) + `<main class="${key === "waiver" || key === "new" || key === "home" ? "narrow" : key === "calendar" ? "wide" : ""}">${r.render()}</main>
+      <footer class="footer"><span><strong>Yaşar Üniversitesi</strong> · Sağlık, Kültür ve Spor</span><span>SKS Rezervasyon Sistemi · prototip</span></footer>`;
     bindNav();
     r.bind?.();
     window.scrollTo(0, 0);
@@ -124,8 +125,8 @@
       .join("");
     return `
       <header class="topnav"><div class="topnav-inner">
-        <a href="#home" class="brand" style="color:inherit;text-decoration:none">
-          <span class="brand-mark">${icon("ti-barbell")}</span><span>Spor Rezervasyon</span>
+        <a href="#home" class="brand">
+          <span class="brand-mark">${icon("ti-barbell")}</span><span>SKS Rezervasyon Sistemi<small>Yaşar Üniversitesi</small></span>
         </a>
         <nav class="nav" aria-label="Ana menü">${u.waiver ? links : ""}</nav>
         <div class="userbox">
@@ -153,10 +154,13 @@
     return `
       <div class="login-wrap"><div class="card login">
         <div class="login-head">
+          <div class="uni">Yaşar Üniversitesi</div>
           <div class="brand-mark">${icon("ti-barbell")}</div>
-          <h1>Spor Rezervasyon</h1>
-          <p class="muted">Üniversite hesabınızla giriş yapın</p>
+          <h1>SKS Rezervasyon Sistemi</h1>
+          <p class="muted">Sağlık, Kültür ve Spor tesisleri rezervasyonu</p>
         </div>
+        <div class="login-body">
+        <p class="muted small" style="margin-bottom:14px">Üniversite hesabınızla giriş yapın.</p>
         <div id="loginError">${error ? alertBox("danger", "ti-alert-circle", esc(error)) : ""}</div>
         <form id="loginForm" novalidate>
           <div class="field"><label for="lu">Kullanıcı adı</label>
@@ -165,7 +169,8 @@
             <input class="input" id="lp" type="password" autocomplete="current-password"></div>
           <button class="btn btn-primary btn-block" type="submit">Giriş yap</button>
         </form>
-        <div class="demo-hint">Prototip: <code>ogrenci</code>, <code>sks</code> veya <code>admin</code> ile, herhangi bir şifreyle girin.</div>
+        <div class="demo-hint">Prototip: <code>ogrenci</code>, <code>sks</code> veya <code>admin</code> ile, herhangi bir şifreyle girin. Bu bir demodur, gerçek şifrenizi yazmayın.</div>
+        </div>
       </div></div>`;
   }
   function bindLogin() {

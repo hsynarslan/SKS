@@ -1,8 +1,12 @@
-# Spor Rezervasyon — tıklanabilir prototip
+# SKS Rezervasyon Sistemi — Yaşar Üniversitesi
 
-Üniversite spor tesisleri rezervasyon sisteminin arayüz prototipi. Tasarım brief'indeki 8 ekranın tamamını,
-tanımlanan tasarım diliyle (renkler, 400/500 tipografi, 8px/12px köşe, 0.5px kenarlık, Tabler outline ikonlar)
-çalışır halde gösterir. Sunucu gerekmez; veriler tarayıcıda (`localStorage`) tutulur.
+Yaşar Üniversitesi Sağlık, Kültür ve Spor (SKS) tesisleri için rezervasyon sisteminin tıklanabilir arayüz
+prototipi. Sunucu gerekmez; veriler tarayıcıda (`localStorage`) tutulur.
+
+**Tema:** Yaşar Üniversitesi kurumsal renkleri — Yaşar laciverti `#00448F` (butonlar, vurgular), web sitesi
+laciverti `#183249` (üst menü, metin), sarı `#FFB901` (menü alt çizgisi, marka simgesi). Renkler
+`css/styles.css` içinde `:root` altında tanımlıdır. Resmî logo dosyası eklenmedi; kullanılacaksa kurumsal
+görseller sayfasındaki orijinal dosya, kılavuzdaki kurallara uygun olarak eklenmelidir.
 
 **Demo:** https://hsynarslan.github.io/SKS/ (GitHub Pages açıldıktan sonra)
 
