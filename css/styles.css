@@ -405,3 +405,54 @@ select.cal-room { width: auto; min-width: 200px; }
 .footer { max-width: 1120px; margin: 0 auto; padding: 0 16px 32px; color: var(--text-2); font-size: 13px; display: flex; gap: 6px 16px; flex-wrap: wrap; justify-content: space-between; }
 .footer strong { font-weight: 500; color: var(--brand); }
 @media (max-width: 440px) { .userbox .who { display: none; } }
+
+/* ---------- Rezervasyon detayı ---------- */
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; letter-spacing: .01em; }
+.modal-wrap {
+  position: fixed; inset: 0; z-index: 50; background: rgba(24, 50, 73, .45);
+  display: grid; place-items: center; padding: 16px;
+}
+.modal {
+  width: 100%; max-width: 640px; max-height: calc(100vh - 32px);
+  background: var(--surface); border-radius: var(--r-card); border-top: 3px solid var(--brand-yellow);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 20px; border-bottom: var(--hair); }
+.modal-head .meta { margin-top: 2px; }
+.modal-body { padding: 16px 20px; overflow-y: auto; }
+.modal-foot { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 20px; border-top: var(--hair); background: var(--surface-2); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; margin-bottom: 16px; }
+.detail-grid .label { margin-bottom: 4px; }
+@media (max-width: 480px) { .detail-grid { grid-template-columns: 1fr; } }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 4px 0 8px; }
+.section-head h3 { font-size: 15px; font-weight: 500; margin: 0; }
+.plist { border: var(--hair); border-radius: var(--r-ctl); border-collapse: separate; border-spacing: 0; overflow: hidden; margin-bottom: 8px; }
+.plist td, .plist th { padding: 8px 10px; }
+.plist .badge { font-size: 12px; padding: 1px 8px; }
+
+/* Onay kartındaki katılımcı numaraları */
+.pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+.pchips .label { margin-right: 4px; }
+.pchip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px;
+  padding: 2px 8px; border-radius: 999px; border: 0.5px solid;
+}
+.pchip.ok { background: var(--success-soft); color: var(--success-ink); border-color: #a9dcc8; }
+.pchip.wait { background: var(--warning-soft); color: var(--warning); border-color: #f0d68a; }
+
+/* Tıklanabilir satırlar */
+.row-btn { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.row-btn:hover, .row-card.clickable:hover { border-color: var(--accent); }
+.row-card.clickable { cursor: pointer; }
+.link { color: var(--accent); display: inline-flex; align-items: center; gap: 2px; }
+.cal-load.clickable { pointer-events: auto; cursor: pointer; }
+.cal-load.clickable:hover, .cal-ev:hover { filter: brightness(.97); }
+
+/* Arama ve filtre */
+.filters { display: grid; grid-template-columns: 1fr 200px; gap: 8px; margin-bottom: 12px; }
+.search { position: relative; }
+.search .ti { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-2); }
+.search .input { padding-left: 36px; }
+@media (max-width: 520px) { .filters { grid-template-columns: 1fr; } }
+.plist td { white-space: normal; vertical-align: top; }
+.plist td:last-child { white-space: nowrap; }

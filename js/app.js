@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const STORE_KEY = "spor-rezervasyon-v1";
+  const STORE_KEY = "spor-rezervasyon-v2";
   const DAYS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
   const DAYS_SHORT = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
   const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -45,7 +45,13 @@
       for (const d of [1, 2, 3, 4, 5]) hours.push({ id: uid(), roomId: r.id, day: d, open: "08:00", close: "22:00" });
       hours.push({ id: uid(), roomId: r.id, day: 6, open: "10:00", close: "18:00" });
     }
-    const p = (n) => Array.from({ length: n }, (_, i) => String(20230100 + i * 7));
+    // Öğrenci rehberi (gerçek sistemde SSO / öğrenci bilgi sisteminden gelir)
+    const names = ["Ali Yıldız", "Selin Aydın", "Burak Çelik", "Ece Kurt", "Mert Aslan", "İrem Polat", "Kaan Doğan",
+      "Derya Güneş", "Emre Tekin", "Buse Kaya", "Onur Şimşek", "Gizem Ateş"];
+    const directory = {};
+    names.forEach((nm, i) => { directory[String(20230100 + i * 7)] = nm; });
+    Object.assign(directory, { 20231045: "Elif Yılmaz", 20221187: "Can Öztürk", 20240312: "Zeynep Arslan", 20210876: "Deniz Şahin", 20230544: "Efe Koç" });
+    const p = (n, off = 0) => Array.from({ length: n }, (_, i) => String(20230100 + ((i + off) % names.length) * 7));
     const res = (o) => ({ id: uid(), team: "", participants: [], reason: "", attended: null, createdAt: Date.now(), ...o });
     return {
       users: {
@@ -53,6 +59,7 @@
         sks: { username: "sks", name: "Murat Kaya", number: "P-1102", role: "SKS", waiver: true },
         admin: { username: "admin", name: "Ayşe Demir", number: "P-0007", role: "ADMIN", waiver: true },
       },
+      directory,
       teams: ["Basketbol takımı", "Voleybol takımı", "Modern dans topluluğu", "Masa tenisi kulübü"],
       rooms, hours,
       closures: [{ id: uid(), start: addDays(20), end: addDays(22), reason: "Zemin bakımı" }],
@@ -61,19 +68,19 @@
         res({ owner: "ogrenci", roomId: "r1", date: addDays(1), start: "09:00", end: "10:00", waivers: 1, status: "APPROVED" }),
         res({ owner: "ogrenci", roomId: "r3", date: addDays(-3), start: "16:00", end: "18:00", team: "Basketbol takımı", participants: p(9), waivers: 10, status: "REJECTED", reason: "Aynı saatte üniversite maçı planlandı." }),
         res({ owner: "ogrenci", roomId: "r1", date: addDays(-6), start: "07:30", end: "08:30", waivers: 1, status: "COMPLETED", attended: 1 }),
-        res({ owner: "u2", ownerName: "Can Öztürk", roomId: "r3", date: addDays(3), start: "20:00", end: "22:00", team: "Voleybol takımı", participants: p(11), waivers: 12, status: "PENDING" }),
-        res({ owner: "u3", ownerName: "Zeynep Arslan", roomId: "r1", date: addDays(1), start: "12:00", end: "13:00", participants: p(2), waivers: 1, status: "PENDING" }),
-        res({ owner: "u4", ownerName: "Deniz Şahin", roomId: "r2", date: addDays(-2), start: "17:00", end: "18:00", participants: p(4), waivers: 5, status: "COMPLETED", attended: 4 }),
-        res({ owner: "u2", ownerName: "Can Öztürk", roomId: "r3", date: addDays(-4), start: "20:00", end: "22:00", team: "Voleybol takımı", participants: p(11), waivers: 12, status: "COMPLETED", attended: 10 }),
-        res({ owner: "u5", ownerName: "Efe Koç", roomId: "r1", date: addDays(-1), start: "18:00", end: "19:00", participants: p(1), waivers: 2, status: "COMPLETED", attended: 1 }),
-        res({ owner: "u3", ownerName: "Zeynep Arslan", roomId: "r1", date: addDays(-5), start: "10:00", end: "11:00", waivers: 1, status: "CANCELLED" }),
+        res({ owner: "u2", ownerName: "Can Öztürk", ownerNumber: "20221187", roomId: "r3", date: addDays(3), start: "20:00", end: "22:00", team: "Voleybol takımı", participants: p(11), waivers: 12, status: "PENDING" }),
+        res({ owner: "u3", ownerName: "Zeynep Arslan", ownerNumber: "20240312", roomId: "r1", date: addDays(1), start: "12:00", end: "13:00", participants: p(2, 7), waivers: 1, status: "PENDING" }),
+        res({ owner: "u4", ownerName: "Deniz Şahin", ownerNumber: "20210876", roomId: "r2", date: addDays(-2), start: "17:00", end: "18:00", participants: p(4, 3), waivers: 5, status: "COMPLETED", attended: 4 }),
+        res({ owner: "u2", ownerName: "Can Öztürk", ownerNumber: "20221187", roomId: "r3", date: addDays(-4), start: "20:00", end: "22:00", team: "Voleybol takımı", participants: p(11), waivers: 12, status: "COMPLETED", attended: 10 }),
+        res({ owner: "u5", ownerName: "Efe Koç", ownerNumber: "20230544", roomId: "r1", date: addDays(-1), start: "18:00", end: "19:00", participants: p(1, 9), waivers: 2, status: "COMPLETED", attended: 1 }),
+        res({ owner: "u3", ownerName: "Zeynep Arslan", ownerNumber: "20240312", roomId: "r1", date: addDays(-5), start: "10:00", end: "11:00", waivers: 1, status: "CANCELLED" }),
       ],
     };
   }
 
   let db = load();
   let session = safeGet("spor-rezervasyon-session");
-  let ui = { adminTab: "rooms", editRoom: null, rejecting: null, flash: null, prefill: null, cal: null };
+  let ui = { adminTab: "rooms", editRoom: null, flash: null, prefill: null, cal: null, apprTab: "pending", aq: "", as: "" };
 
   function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
   function safeSet(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* yok say */ } }
@@ -84,6 +91,11 @@
   const room = (id) => db.rooms.find((r) => r.id === id);
   const people = (r) => 1 + r.participants.length;
   const ownerLabel = (r) => (db.users[r.owner]?.name || r.ownerName || r.owner);
+  const ownerNo = (r) => db.users[r.owner]?.number || r.ownerNumber || "";
+  const personName = (no) => db.directory?.[no] || "";
+  const isStaff = () => me().role !== "USER";
+  // Feragatname: talep sahibi her zaman imzalıdır; katılımcılardan ilk (waivers - 1) kişi imzalamış sayılır
+  const signedSet = (r) => new Set(r.participants.slice(0, Math.max(0, r.waivers - 1)));
 
   // ---------- Yönlendirme ----------
   const ROUTES = {
@@ -102,6 +114,7 @@
 
   function render() {
     const app = $("#app");
+    closeModal();
     if (!me()) { app.innerHTML = loginView(); bindLogin(); document.title = "Giriş · SKS Rezervasyon Sistemi"; return; }
     let key = location.hash.slice(1) || "home";
     if (!ROUTES[key] || !ROUTES[key].roles.includes(me().role)) key = "home";
@@ -384,6 +397,126 @@
     return "";
   }
 
+  // ---------- Rezervasyon detayı (pencere) ----------
+  function closeModal() { document.querySelector(".modal-wrap")?.remove(); document.removeEventListener("keydown", modalKey); }
+  function modalKey(e) { if (e.key === "Escape") closeModal(); }
+  function openModal(html) {
+    closeModal();
+    const wrap = document.createElement("div");
+    wrap.className = "modal-wrap";
+    wrap.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">${html}</div>`;
+    wrap.onclick = (e) => { if (e.target === wrap || e.target.closest("[data-close]")) closeModal(); };
+    document.body.appendChild(wrap);
+    document.addEventListener("keydown", modalKey);
+    wrap.querySelector("[data-close]")?.focus();
+    return wrap;
+  }
+
+  function setStatus(r, status, reason = "") {
+    r.status = status; r.reason = reason; save(); closeModal();
+    toast(status === "APPROVED" ? "Rezervasyon onaylandı." : "Rezervasyon reddedildi.");
+    render();
+  }
+
+  function openDetail(id) {
+    const r = db.reservations.find((x) => x.id === id);
+    if (!r || (!isStaff() && r.owner !== me().username)) return;
+    const rm = room(r.roomId), n = people(r), signed = signedSet(r);
+    const row = (i, no, name, role, ok) => `
+      <tr><td class="num muted">${i}</td>
+        <td><span class="mono">${esc(no) || "—"}</span>${role ? ` <span class="badge b-accent">${role}</span>` : ""}
+          <div class="small ${name ? "" : "muted"}">${esc(name) || "Rehberde yok"}</div></td>
+        <td>${ok ? `<span class="badge b-success">${icon("ti-check")}İmzaladı</span>` : `<span class="badge b-warning">${icon("ti-hourglass")}Bekleniyor</span>`}</td></tr>`;
+    const canDecide = isStaff() && r.status === "PENDING";
+    const w = openModal(`
+      <div class="modal-head">
+        <div><h2 id="mTitle">${esc(rm?.name || "Silinmiş alan")}</h2>
+          <div class="meta muted small">${fmtDate(r.date)} · ${r.start}–${r.end} · ${n} kişi</div></div>
+        <button class="btn btn-ghost" data-close aria-label="Kapat">${icon("ti-x")}</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div><div class="label">Durum</div>${statusBadge(r.status)}</div>
+          <div><div class="label">Tür</div>${r.team ? `Takım · ${esc(r.team)}` : "Bireysel"}</div>
+          <div><div class="label">Talep sahibi</div>${esc(ownerLabel(r))}${ownerNo(r) ? ` <span class="mono muted">${esc(ownerNo(r))}</span>` : ""}</div>
+          <div><div class="label">Talep tarihi</div>${new Date(r.createdAt).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}</div>
+        </div>
+        ${r.status === "REJECTED" && r.reason ? alertBox("danger", "ti-message-report", `Red sebebi: ${esc(r.reason)}`) : ""}
+        <div class="section-head">
+          <h3>Katılımcılar <span class="muted">(${n})</span></h3>
+          <span class="small muted">${r.waivers}/${n} feragatname</span>
+        </div>
+        <div class="table-wrap"><table class="plist">
+          <thead><tr><th class="num">#</th><th>Öğrenci</th><th>Feragatname</th></tr></thead>
+          <tbody>
+            ${row(1, ownerNo(r), ownerLabel(r), "Talep sahibi", true)}
+            ${r.participants.map((no, i) => row(i + 2, no, personName(no), "", signed.has(no))).join("")}
+          </tbody>
+        </table></div>
+        ${r.participants.length ? `<button class="btn btn-ghost small" id="mCopy">${icon("ti-copy")}Öğrenci numaralarını kopyala</button>` : ""}
+      </div>
+      ${canDecide ? `
+      <div class="modal-foot" id="mActions">
+        <button class="btn btn-success" id="mApprove">${icon("ti-check")}Onayla</button>
+        <button class="btn btn-danger-outline" id="mReject">${icon("ti-x")}Reddet</button>
+      </div>` : ""}`);
+    w.querySelector("#mCopy")?.addEventListener("click", async () => {
+      const text = [ownerNo(r), ...r.participants].filter(Boolean).join("\n");
+      try { await navigator.clipboard.writeText(text); toast("Numaralar kopyalandı."); } catch { toast("Kopyalanamadı."); }
+    });
+    if (canDecide) {
+      w.querySelector("#mApprove").onclick = () => setStatus(r, "APPROVED");
+      w.querySelector("#mReject").onclick = () => {
+        w.querySelector("#mActions").innerHTML = `
+          <div class="reject-box" style="width:100%">
+            <label class="label" for="mReason">Red sebebi</label>
+            <textarea class="input" id="mReason" placeholder="Kullanıcıya gösterilecek açıklama"></textarea>
+            <p class="small" id="mErr" style="color:var(--danger)" hidden>Lütfen bir sebep yazın.</p>
+            <div class="btn-row"><button class="btn btn-danger" id="mConfirm">${icon("ti-x")}Reddet</button>
+              <button class="btn btn-outline" data-close>Vazgeç</button></div>
+          </div>`;
+        w.querySelector("#mReason").focus();
+        w.querySelector("#mConfirm").onclick = () => {
+          const reason = w.querySelector("#mReason").value.trim();
+          if (!reason) { w.querySelector("#mErr").hidden = false; return; }
+          setStatus(r, "REJECTED", reason);
+        };
+      };
+    }
+  }
+
+  // Paylaşımlı alanda bir zaman dilimindeki talepler
+  function openSlot(roomId, date, from, to) {
+    const rm = room(roomId);
+    const list = activeOn(roomId, date).filter((x) => toMin(x.start) < to && from < toMin(x.end));
+    const w = openModal(`
+      <div class="modal-head">
+        <div><h2 id="mTitle">${esc(rm.name)}</h2><div class="meta muted small">${fmtDate(date)} · ${fromMin(from)}–${fromMin(to)}</div></div>
+        <button class="btn btn-ghost" data-close aria-label="Kapat">${icon("ti-x")}</button>
+      </div>
+      <div class="modal-body stack">${list.map((x) => resRow(x)).join("")}</div>`);
+    bindResRows(w);
+  }
+
+  // Personel listelerinde kullanılan tıklanabilir satır
+  function resRow(r) {
+    const rm = room(r.roomId);
+    return `
+      <button class="row-card row-btn" data-open="${r.id}">
+        <div>
+          <div class="title">${esc(ownerLabel(r))}${ownerNo(r) ? ` <span class="mono muted small">${esc(ownerNo(r))}</span>` : ""}</div>
+          <div class="meta">
+            <span>${icon("ti-building")}${esc(rm?.name || "Silinmiş alan")}${r.team ? ` · ${esc(r.team)}` : ""}</span>
+            <span>${icon("ti-calendar")}${fmtDate(r.date)}</span>
+            <span>${icon("ti-clock")}${r.start}–${r.end}</span>
+            <span>${icon("ti-users")}${people(r)} kişi</span>
+          </div>
+        </div>
+        <div class="side">${statusBadge(r.status)}<span class="small link">Detay ${icon("ti-chevron-right")}</span></div>
+      </button>`;
+  }
+  function bindResRows(root = document) { root.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => openDetail(b.dataset.open)); }
+
   // ---------- Takvim ----------
   const HOUR_PX = 44;
   function calState() {
@@ -457,7 +590,7 @@
         }
         parts += segs.map((sg) => {
           const full = sg.n >= r.capacity, top = px(sg.start), h = px(sg.end) - top;
-          return `<div class="cal-load ${full ? "full" : ""} ${sg.pend ? "pending" : ""}" style="top:${top}px;height:${h}px" title="${fromMin(sg.start)}–${fromMin(sg.end)} · ${sg.n}/${r.capacity} kişi${full ? " · dolu" : ""}">
+          return `<div class="cal-load ${full ? "full" : ""} ${sg.pend ? "pending" : ""} ${staff ? "clickable" : ""}" data-seg="${sg.start}-${sg.end}" style="top:${top}px;height:${h}px" title="${fromMin(sg.start)}–${fromMin(sg.end)} · ${sg.n}/${r.capacity} kişi${full ? " · dolu" : ""}">
             <span class="t">${full ? "Dolu" : `${sg.n}/${r.capacity}`}</span>${h >= 34 && !full ? `<span class="w">${r.capacity - sg.n} yer var</span>` : ""}</div>`;
         }).join("");
       }
@@ -511,11 +644,15 @@
     document.querySelectorAll(".cal-ev").forEach((el) => el.onclick = (e) => {
       e.stopPropagation();
       const x = db.reservations.find((r) => r.id === el.dataset.ev);
-      if (x.owner === me().username) go("mine");
-      else if (me().role !== "USER" && x.status === "PENDING") go("approvals");
+      if (isStaff() || x.owner === me().username) openDetail(x.id);
       else toast(`${x.start}–${x.end} arası dolu.`);
     });
-    document.querySelectorAll(".cal-load.full").forEach((el) => el.onclick = (e) => { e.stopPropagation(); toast("Bu saatte kapasite dolu."); });
+    document.querySelectorAll(".cal-load.full, .cal-load.clickable").forEach((el) => el.onclick = (e) => {
+      e.stopPropagation();
+      const col = el.closest(".cal-col"), [a, b] = el.dataset.seg.split("-").map(Number);
+      if (isStaff()) openSlot(col.dataset.room, col.dataset.date, a, b);
+      else toast("Bu saatte kapasite dolu.");
+    });
     // Boş saate tıklama: o saatle doldurulmuş talep formunu açar
     const from = +$(".cal")?.dataset.from;
     document.querySelectorAll(".cal-col").forEach((col) => col.onclick = (e) => {
@@ -540,7 +677,9 @@
   // ---------- 5. Rezervasyonlarım ----------
   function renderMine() {
     ROUTES.mine.bind = () => {
-      document.querySelectorAll("[data-cancel]").forEach((b) => b.onclick = () => {
+      bindResRows();
+      document.querySelectorAll("[data-cancel]").forEach((b) => b.onclick = (e) => {
+        e.stopPropagation();
         const r = db.reservations.find((x) => x.id === b.dataset.cancel);
         if (!confirm("Bu rezervasyonu iptal etmek istiyor musunuz?")) return;
         r.status = "CANCELLED"; save(); toast("Rezervasyon iptal edildi."); render();
@@ -559,7 +698,7 @@
           const rm = room(r.roomId);
           const cancellable = ["PENDING", "APPROVED"].includes(r.status) && r.date >= addDays(0);
           return `
-          <article class="row-card">
+          <article class="row-card clickable" data-open="${r.id}">
             <div>
               <div class="title">${esc(rm?.name || "Silinmiş alan")}${r.team ? ` <span class="muted">· ${esc(r.team)}</span>` : ""}</div>
               <div class="meta">
@@ -580,64 +719,82 @@
 
   // ---------- 6. SKS onay kuyruğu ----------
   function renderApprovals() {
-    ROUTES.approvals.bind = () => {
-      const find = (id) => db.reservations.find((x) => x.id === id);
-      document.querySelectorAll("[data-approve]").forEach((b) => b.onclick = () => {
-        find(b.dataset.approve).status = "APPROVED"; save(); toast("Rezervasyon onaylandı."); render();
-      });
-      document.querySelectorAll("[data-reject]").forEach((b) => b.onclick = () => { ui.rejecting = b.dataset.reject; render(); $("#rejReason")?.focus(); });
-      document.querySelectorAll("[data-cancel-reject]").forEach((b) => b.onclick = () => { ui.rejecting = null; render(); });
-      document.querySelectorAll("[data-confirm-reject]").forEach((b) => b.onclick = () => {
-        const reason = $("#rejReason").value.trim();
-        if (!reason) { $("#rejErr").hidden = false; $("#rejReason").focus(); return; }
-        const r = find(b.dataset.confirmReject);
-        r.status = "REJECTED"; r.reason = reason; ui.rejecting = null; save(); toast("Rezervasyon reddedildi."); render();
-      });
-    };
-    const list = db.reservations.filter((r) => r.status === "PENDING").sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+    ROUTES.approvals.bind = bindApprovals;
+    const pending = db.reservations.filter((r) => r.status === "PENDING").sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+    const tab = ui.apprTab || "pending";
     return `
-      <div class="page-head"><h1>Onay bekleyenler</h1><span class="badge b-warning">${list.length}</span></div>
-      <p class="page-sub">Tarihe göre sıralı ön rezervasyonlar.</p>
-      <div class="stack">
-        ${list.length ? list.map((r) => {
-          const rm = room(r.roomId), n = people(r), pct = Math.round((r.waivers / n) * 100);
-          const rejecting = ui.rejecting === r.id;
-          return `
-          <article class="card approval">
-            <div class="top">
-              <div>
-                <h2>${esc(rm?.name || "Silinmiş alan")}</h2>
-                <div class="muted" style="margin-top:2px">${esc(ownerLabel(r))}${r.team ? ` · ${esc(r.team)}` : ""} · ${n} kişi</div>
-              </div>
-              <span class="badge ${r.team ? "b-accent" : "b-neutral"}">${icon(r.team ? "ti-users-group" : "ti-user")}${r.team ? "Takım" : "Bireysel"}</span>
-            </div>
-            <div class="row-card" style="border:0;padding:0;margin-top:10px;display:block">
-              <div class="meta">
-                <span>${icon("ti-calendar")}${fmtDate(r.date)}</span>
-                <span>${icon("ti-clock")}${r.start}–${r.end}</span>
-                <span class="waiver-meter">${icon("ti-file-certificate")}${r.waivers}/${n} feragatname
-                  <span class="meter ${pct < 100 ? "partial" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span></span>
-              </div>
-            </div>
-            <div class="actions">
-              ${rejecting ? `
-                <div class="reject-box">
-                  <label class="label" for="rejReason">Red sebebi</label>
-                  <textarea class="input" id="rejReason" placeholder="Kullanıcıya gösterilecek açıklama"></textarea>
-                  <p class="small" id="rejErr" style="color:var(--danger)" hidden>Lütfen bir sebep yazın.</p>
-                  <div class="btn-row">
-                    <button class="btn btn-danger" data-confirm-reject="${r.id}">${icon("ti-x")}Reddet</button>
-                    <button class="btn btn-outline" data-cancel-reject>Vazgeç</button>
-                  </div>
-                </div>` : `
-                <div class="btn-row">
-                  <button class="btn btn-success" data-approve="${r.id}">${icon("ti-check")}Onayla</button>
-                  <button class="btn btn-danger-outline" data-reject="${r.id}">${icon("ti-x")}Reddet</button>
-                </div>`}
-            </div>
-          </article>`;
-        }).join("") : `<div class="empty">${icon("ti-circle-check")}Onay bekleyen talep yok.</div>`}
-      </div>`;
+      <h1 class="page-head">Rezervasyon talepleri</h1>
+      <p class="page-sub">${tab === "pending" ? "Tarihe göre sıralı ön rezervasyonlar. Katılımcıları görmek için karta tıklayın." : "Ad, öğrenci numarası, takım veya alana göre arayın. Aranan numara katılımcılar arasında da aranır."}</p>
+      <div class="tabs" role="tablist">
+        <button class="tab ${tab === "pending" ? "active" : ""}" data-atab="pending" role="tab" aria-selected="${tab === "pending"}">${icon("ti-hourglass")}Onay bekleyenler <span class="badge b-warning">${pending.length}</span></button>
+        <button class="tab ${tab === "all" ? "active" : ""}" data-atab="all" role="tab" aria-selected="${tab === "all"}">${icon("ti-list-search")}Tüm rezervasyonlar</button>
+      </div>
+      ${tab === "pending" ? `<div class="stack">${pending.length ? pending.map(pendingCard).join("") : `<div class="empty">${icon("ti-circle-check")}Onay bekleyen talep yok.</div>`}</div>` : `
+      <div class="filters">
+        <div class="search">${icon("ti-search")}<input class="input" id="aq" type="search" placeholder="Ad, öğrenci no, takım, alan…" value="${esc(ui.aq || "")}" aria-label="Ara"></div>
+        <select class="input" id="as" aria-label="Durum">
+          <option value="">Tüm durumlar</option>
+          ${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${ui.as === k ? "selected" : ""}>${v.label}</option>`).join("")}
+        </select>
+      </div>
+      <div id="allList" class="stack"></div>`}`;
+  }
+
+  function pendingCard(r) {
+    const rm = room(r.roomId), n = people(r), pct = Math.round((r.waivers / n) * 100), signed = signedSet(r);
+    const shown = r.participants.slice(0, 8);
+    return `
+      <article class="card approval">
+        <div class="top">
+          <div>
+            <h2>${esc(rm?.name || "Silinmiş alan")}</h2>
+            <div style="margin-top:2px">${esc(ownerLabel(r))}${ownerNo(r) ? ` <span class="mono muted">${esc(ownerNo(r))}</span>` : ""}
+              <span class="muted">${r.team ? ` · ${esc(r.team)}` : ""} · ${n} kişi</span></div>
+          </div>
+          <span class="badge ${r.team ? "b-accent" : "b-neutral"}">${icon(r.team ? "ti-users-group" : "ti-user")}${r.team ? "Takım" : "Bireysel"}</span>
+        </div>
+        <div class="meta muted small" style="display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px">
+          <span>${icon("ti-calendar")}${fmtDate(r.date)}</span>
+          <span>${icon("ti-clock")}${r.start}–${r.end}</span>
+          <span class="waiver-meter">${icon("ti-file-certificate")}${r.waivers}/${n} feragatname
+            <span class="meter ${pct < 100 ? "partial" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span></span>
+        </div>
+        ${r.participants.length ? `
+        <div class="pchips">
+          <span class="label">Katılımcılar</span>
+          ${shown.map((no) => `<span class="pchip ${signed.has(no) ? "ok" : "wait"}" title="${esc(personName(no) || "Rehberde yok")} · feragatname ${signed.has(no) ? "imzalandı" : "bekleniyor"}">${esc(no)}</span>`).join("")}
+          ${r.participants.length > shown.length ? `<span class="muted small">+${r.participants.length - shown.length}</span>` : ""}
+        </div>` : ""}
+        <div class="actions btn-row">
+          <button class="btn btn-success" data-approve="${r.id}">${icon("ti-check")}Onayla</button>
+          <button class="btn btn-danger-outline" data-reject="${r.id}">${icon("ti-x")}Reddet</button>
+          <button class="btn btn-outline" data-open="${r.id}" style="margin-left:auto">${icon("ti-list-details")}Detay ve katılımcılar</button>
+        </div>
+      </article>`;
+  }
+
+  function bindApprovals() {
+    document.querySelectorAll("[data-atab]").forEach((b) => b.onclick = () => { ui.apprTab = b.dataset.atab; render(); });
+    document.querySelectorAll("[data-approve]").forEach((b) => b.onclick = () => setStatus(db.reservations.find((x) => x.id === b.dataset.approve), "APPROVED"));
+    // Reddet: sebep girişi detay penceresinde açılır
+    document.querySelectorAll("[data-reject]").forEach((b) => b.onclick = () => { openDetail(b.dataset.reject); $("#mReject")?.click(); });
+    bindResRows();
+    if ($("#allList")) {
+      const draw = () => {
+        const q = (ui.aq || "").toLocaleLowerCase("tr").trim();
+        const list = db.reservations
+          .filter((r) => !ui.as || r.status === ui.as)
+          .filter((r) => !q || [ownerLabel(r), ownerNo(r), r.team, room(r.roomId)?.name, ...r.participants, ...r.participants.map(personName)]
+            .some((v) => String(v || "").toLocaleLowerCase("tr").includes(q)))
+          .sort((a, b) => (b.date + b.start).localeCompare(a.date + a.start));
+        $("#allList").innerHTML = `<p class="small muted">${list.length} rezervasyon</p>` +
+          (list.length ? list.map(resRow).join("") : `<div class="empty">${icon("ti-search")}Sonuç bulunamadı.</div>`);
+        bindResRows($("#allList"));
+      };
+      $("#aq").oninput = (e) => { ui.aq = e.target.value; draw(); };
+      $("#as").onchange = (e) => { ui.as = e.target.value; draw(); };
+      draw();
+    }
   }
 
   // ---------- 7. İstatistik ----------

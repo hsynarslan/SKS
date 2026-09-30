@@ -40,7 +40,14 @@ Herhangi bir şifreyle:
    (ör. `12/30`, kapasite dolunca kırmızı "Dolu"). Boş bir saate tıklamak, formu o alan/gün/saatle doldurur.
    Öğrenciler başkalarının adını görmez ("Dolu" / "Ön rezervasyon"), SKS ve Admin kişi/takım adını görür.
 5. **Rezervasyonlarım** — durum rozetli kartlar, reddedilenlerde sebep, ön rezervasyon ve onaylılarda iptal
-6. **Onaylar** — adet rozeti, Bireysel/Takım rozeti, feragatname durumu, Onayla / Reddet (sebep + Vazgeç)
+6. **Rezervasyon talepleri** (SKS/Admin) — iki sekme:
+   - *Onay bekleyenler*: talep sahibi (ad + öğrenci no), katılımcı numaraları (yeşil: feragatname imzalı, sarı:
+     bekleniyor), Onayla / Reddet / Detay ve katılımcılar
+   - *Tüm rezervasyonlar*: ad, öğrenci numarası, takım veya alana göre arama (numara katılımcılar arasında da
+     aranır) ve durum filtresi
+   - **Detay penceresi**: talep sahibi ve tüm katılımcılar (öğrenci no, ad, feragatname durumu), talep tarihi,
+     red sebebi, numaraları kopyalama; bekleyen talepte onay/red. Takvimdeki bloklara tıklayınca da açılır.
+     Öğrenci yalnızca kendi taleplerinin detayını görebilir.
 7. **İstatistik** — toplam rezervasyon ve kişi kartları, alan bazında tablo ve katılım oranı
 8. **Yönetim** — Odalar, Açık saatler, Kapalı günler sekmeleri
 
