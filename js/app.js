@@ -6,6 +6,7 @@
 
   const STORE_KEY = "spor-rezervasyon-v1";
   const DAYS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+  const DAYS_SHORT = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
   const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
   const ROLES = { USER: "Kullanıcı", SKS: "SKS onaylayıcı", ADMIN: "Admin" };
   const STATUS = {
@@ -27,6 +28,9 @@
   const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return isoDate(d); };
   const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
   const fmtDate = (iso) => new Date(iso + "T00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long", weekday: "short" });
+  const fromMin = (m) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+  const shiftDate = (iso, n) => { const d = new Date(iso + "T00:00"); d.setDate(d.getDate() + n); return isoDate(d); };
+  const mondayOf = (iso) => shiftDate(iso, -((new Date(iso + "T00:00").getDay() + 6) % 7));
   const uid = () => Math.random().toString(36).slice(2, 9);
 
   // ---------- Örnek veri ----------
@@ -69,7 +73,7 @@
 
   let db = load();
   let session = safeGet("spor-rezervasyon-session");
-  let ui = { adminTab: "rooms", editRoom: null, rejecting: null, flash: null };
+  let ui = { adminTab: "rooms", editRoom: null, rejecting: null, flash: null, prefill: null, cal: null };
 
   function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
   function safeSet(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* yok say */ } }
@@ -86,6 +90,7 @@
     home:      { title: "Ana sayfa",        roles: ["USER", "SKS", "ADMIN"], render: renderHome },
     waiver:    { title: "Feragatname",      roles: ["USER", "SKS", "ADMIN"], render: renderWaiver },
     new:       { title: "Yeni rezervasyon", roles: ["USER", "SKS", "ADMIN"], render: renderNew, nav: ["Yeni", "ti-calendar-plus"] },
+    calendar:  { title: "Takvim",           roles: ["USER", "SKS", "ADMIN"], render: renderCalendar, nav: ["Takvim", "ti-calendar-week"] },
     mine:      { title: "Rezervasyonlarım", roles: ["USER", "SKS", "ADMIN"], render: renderMine, nav: ["Rezervasyonlarım", "ti-list-details"] },
     approvals: { title: "Onaylar",          roles: ["SKS", "ADMIN"],         render: renderApprovals, nav: ["Onaylar", "ti-checks"] },
     stats:     { title: "İstatistik",       roles: ["SKS", "ADMIN"],         render: renderStats, nav: ["İstatistik", "ti-chart-bar"] },
@@ -104,7 +109,7 @@
     if (!me().waiver && key !== "waiver") key = "waiver";
     const r = ROUTES[key];
     document.title = `${r.title} · Spor Rezervasyon`;
-    app.innerHTML = navView(key) + `<main class="${key === "waiver" || key === "new" || key === "home" ? "narrow" : ""}">${r.render()}</main>`;
+    app.innerHTML = navView(key) + `<main class="${key === "waiver" || key === "new" || key === "home" ? "narrow" : key === "calendar" ? "wide" : ""}">${r.render()}</main>`;
     bindNav();
     r.bind?.();
     window.scrollTo(0, 0);
@@ -229,6 +234,7 @@
   function renderNew() {
     ROUTES.new.bind = bindNew;
     const flash = ui.flash; ui.flash = null;
+    const pf = ui.prefill || { roomId: "", date: addDays(1), start: "18:00", end: "19:00" }; ui.prefill = null;
     return `
       <h1 class="page-head">Yeni rezervasyon</h1>
       <p class="page-sub">Talebiniz SKS onayından sonra kesinleşir.</p>
@@ -237,14 +243,15 @@
         <div class="field"><label for="nRoom">Alan</label>
           <select class="input" id="nRoom">
             <option value="">Alan seçin</option>
-            ${db.rooms.map((r) => `<option value="${r.id}">${esc(r.name)} (${MODES[r.mode]} · ${r.capacity} kişi)</option>`).join("")}
+            ${db.rooms.map((r) => `<option value="${r.id}" ${pf.roomId === r.id ? "selected" : ""}>${esc(r.name)} (${MODES[r.mode]} · ${r.capacity} kişi)</option>`).join("")}
           </select>
         </div>
         <div class="grid-3 form-row">
-          <div class="field"><label for="nDate">Tarih</label><input class="input" type="date" id="nDate" min="${addDays(0)}" value="${addDays(1)}"></div>
-          <div class="field"><label for="nStart">Başlangıç</label><input class="input" type="time" id="nStart" step="900" value="18:00"></div>
-          <div class="field"><label for="nEnd">Bitiş</label><input class="input" type="time" id="nEnd" step="900" value="19:00"></div>
+          <div class="field"><label for="nDate">Tarih</label><input class="input" type="date" id="nDate" min="${addDays(0)}" value="${pf.date}"></div>
+          <div class="field"><label for="nStart">Başlangıç</label><input class="input" type="time" id="nStart" step="900" value="${pf.start}"></div>
+          <div class="field"><label for="nEnd">Bitiş</label><input class="input" type="time" id="nEnd" step="900" value="${pf.end}"></div>
         </div>
+        <div id="nBusy" class="busy" aria-live="polite"></div>
         <div class="field"><label for="nTeam">Takım <span class="muted">(opsiyonel)</span></label>
           <select class="input" id="nTeam">
             <option value="">— Bireysel —</option>
@@ -288,7 +295,40 @@
     box.onclick = (e) => { if (e.target === box) input.focus(); };
   }
 
+  // Seçilen alan ve gün için açık saatler ve dolu aralıklar
+  function busyHtml(roomId, date) {
+    const r = room(roomId);
+    if (!r || !date) return "";
+    const calLink = `<a href="#calendar" data-cal-room="${r.id}" data-cal-date="${date}">${icon("ti-calendar-week")}Takvimde gör</a>`;
+    const closed = db.closures.find((c) => date >= c.start && date <= c.end);
+    if (closed) return `<div class="busy-head"><span class="badge b-neutral">${icon("ti-lock")}Kapalı: ${esc(closed.reason)}</span>${calLink}</div>`;
+    const day = new Date(date + "T00:00").getDay();
+    const open = db.hours.filter((h) => h.roomId === r.id && h.day === day).sort((a, b) => a.open.localeCompare(b.open));
+    if (!open.length) return `<div class="busy-head"><span class="badge b-neutral">${icon("ti-lock")}${DAYS[day]} günleri kapalı</span>${calLink}</div>`;
+    const taken = activeOn(r.id, date);
+    return `
+      <div class="busy-head"><span class="muted small">${icon("ti-clock")} Açık: ${open.map((h) => `${h.open}–${h.close}`).join(", ")}</span>${calLink}</div>
+      <div class="busy-list">${taken.length
+        ? taken.map((x) => `<span class="badge ${x.status === "PENDING" ? "b-warning" : "b-success"}" title="${STATUS[x.status].label}">${x.start}–${x.end}${r.mode === "shared" ? ` · ${people(x)} kişi` : ""}</span>`).join("")
+        : `<span class="badge b-accent">${icon("ti-circle-check")}Bu gün henüz talep yok</span>`}</div>
+      ${taken.length ? `<p class="hint">${r.mode === "shared" ? `Paylaşımlı alan: aynı saatte toplam ${r.capacity} kişiye kadar talep yapılabilir.` : "Münhasır alan: listelenen saatler doludur."}</p>` : ""}`;
+  }
+  const activeOn = (roomId, date) => db.reservations
+    .filter((x) => x.roomId === roomId && x.date === date && ["PENDING", "APPROVED", "COMPLETED"].includes(x.status))
+    .sort((a, b) => a.start.localeCompare(b.start));
+
+  function bindCalLinks(root = document) {
+    root.querySelectorAll("[data-cal-room]").forEach((a) => a.onclick = (e) => {
+      e.preventDefault();
+      ui.cal = { view: "week", roomId: a.dataset.calRoom, date: a.dataset.calDate };
+      go("calendar");
+    });
+  }
+
   function bindNew() {
+    const drawBusy = () => { $("#nBusy").innerHTML = busyHtml($("#nRoom").value, $("#nDate").value); bindCalLinks($("#nBusy")); };
+    $("#nRoom").onchange = drawBusy; $("#nDate").onchange = drawBusy;
+    drawBusy();
     drawChips();
     $("#newForm").onsubmit = (e) => {
       e.preventDefault();
@@ -337,6 +377,159 @@
       if (used + count > r.capacity) return `Bu saatte yalnızca ${Math.max(0, r.capacity - used)} kişilik yer kaldı.`;
     }
     return "";
+  }
+
+  // ---------- Takvim ----------
+  const HOUR_PX = 44;
+  function calState() {
+    if (!ui.cal) ui.cal = { view: matchMedia("(max-width: 720px)").matches ? "day" : "week", roomId: db.rooms[0]?.id, date: addDays(0) };
+    if (!room(ui.cal.roomId)) ui.cal.roomId = db.rooms[0]?.id;
+    return ui.cal;
+  }
+
+  function renderCalendar() {
+    ROUTES.calendar.bind = bindCalendar;
+    const c = calState();
+    if (!db.rooms.length) return `<h1 class="page-head">Takvim</h1><div class="empty">${icon("ti-building")}Henüz alan tanımlı değil.</div>`;
+    const cols = c.view === "week"
+      ? Array.from({ length: 7 }, (_, i) => ({ date: shiftDate(mondayOf(c.date), i), room: room(c.roomId) }))
+      : db.rooms.map((r) => ({ date: c.date, room: r }));
+    // Görünen saat aralığı: ilgili alanların en erken açılışı – en geç kapanışı
+    const hs = db.hours.filter((h) => cols.some((col) => col.room.id === h.roomId));
+    const from = Math.floor(Math.min(8 * 60, ...hs.map((h) => toMin(h.open))) / 60) * 60;
+    const to = Math.ceil(Math.max(22 * 60, ...hs.map((h) => toMin(h.close))) / 60) * 60;
+    const px = (m) => ((m - from) * HOUR_PX) / 60;
+    const today = addDays(0), now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
+    const staff = me().role !== "USER";
+
+    const label = c.view === "week"
+      ? (() => { const a = new Date(mondayOf(c.date) + "T00:00"), b = new Date(shiftDate(mondayOf(c.date), 6) + "T00:00");
+          return `${a.toLocaleDateString("tr-TR", { day: "numeric", month: "short" })} – ${b.toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}`; })()
+      : new Date(c.date + "T00:00").toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+    const head = cols.map((col) => {
+      const isToday = col.date === today;
+      return c.view === "week"
+        ? `<div class="cal-colhead ${isToday ? "today" : ""}"><span>${DAYS_SHORT[new Date(col.date + "T00:00").getDay()]}</span><strong>${new Date(col.date + "T00:00").getDate()}</strong></div>`
+        : `<div class="cal-colhead"><strong class="room-name">${esc(col.room.name)}</strong><span>${MODES[col.room.mode]} · ${col.room.capacity} kişi</span></div>`;
+    }).join("");
+
+    const body = cols.map((col) => {
+      const r = col.room, day = new Date(col.date + "T00:00").getDay();
+      const closure = db.closures.find((x) => col.date >= x.start && col.date <= x.end);
+      const open = closure ? [] : db.hours.filter((h) => h.roomId === r.id && h.day === day).map((h) => [toMin(h.open), toMin(h.close)]).sort((a, b) => a[0] - b[0]);
+      let parts = "";
+      // Kapalı bölgeler (açık saatlerin dışı)
+      let cur = from;
+      for (const [o, cl] of open) { if (o > cur) parts += `<div class="cal-closed" style="top:${px(cur)}px;height:${px(o) - px(cur)}px"></div>`; cur = Math.max(cur, cl); }
+      if (cur < to) parts += `<div class="cal-closed" style="top:${px(cur)}px;height:${px(to) - px(cur)}px">${closure ? `<span>${icon("ti-lock")}${esc(closure.reason)}</span>` : !open.length ? `<span>Kapalı</span>` : ""}</div>`;
+      // Geçmiş zaman
+      if (col.date < today) parts += `<div class="cal-past" style="top:0;height:${px(to)}px"></div>`;
+      else if (col.date === today && nowMin > from) {
+        parts += `<div class="cal-past" style="top:0;height:${px(Math.min(nowMin, to))}px"></div>`;
+        if (nowMin < to) parts += `<div class="cal-now" style="top:${px(nowMin)}px"></div>`;
+      }
+      const list = activeOn(r.id, col.date);
+      if (r.mode === "exclusive") {
+        parts += list.map((x) => {
+          const mine = x.owner === me().username;
+          const who = mine ? "Sizin talebiniz" : staff ? `${esc(x.team || ownerLabel(x))}` : x.status === "PENDING" ? "Ön rezervasyon" : "Dolu";
+          const top = px(toMin(x.start)), h = px(toMin(x.end)) - top;
+          return `<div class="cal-ev ${x.status === "PENDING" ? "pending" : "approved"} ${mine ? "mine" : ""}" style="top:${top}px;height:${h}px"
+            title="${x.start}–${x.end} · ${STATUS[x.status].label}${staff || mine ? ` · ${people(x)} kişi` : ""}" data-ev="${x.id}">
+            <span class="t">${x.start}–${x.end}</span>${h >= 34 ? `<span class="w">${who}</span>` : ""}</div>`;
+        }).join("");
+      } else {
+        // Paylaşımlı alan: 30 dakikalık dilimlerde toplam kişi, aynı değerli komşu dilimler birleşir
+        const segs = [];
+        for (let m = from; m < to; m += 30) {
+          const inSlot = list.filter((x) => toMin(x.start) < m + 30 && m < toMin(x.end));
+          const n = inSlot.reduce((s, x) => s + people(x), 0);
+          const pend = inSlot.some((x) => x.status === "PENDING");
+          const last = segs[segs.length - 1];
+          if (n && last && last.n === n && last.end === m && last.pend === pend) last.end = m + 30;
+          else if (n) segs.push({ start: m, end: m + 30, n, pend });
+        }
+        parts += segs.map((sg) => {
+          const full = sg.n >= r.capacity, top = px(sg.start), h = px(sg.end) - top;
+          return `<div class="cal-load ${full ? "full" : ""} ${sg.pend ? "pending" : ""}" style="top:${top}px;height:${h}px" title="${fromMin(sg.start)}–${fromMin(sg.end)} · ${sg.n}/${r.capacity} kişi${full ? " · dolu" : ""}">
+            <span class="t">${full ? "Dolu" : `${sg.n}/${r.capacity}`}</span>${h >= 34 && !full ? `<span class="w">${r.capacity - sg.n} yer var</span>` : ""}</div>`;
+        }).join("");
+      }
+      return `<div class="cal-col ${col.date === today ? "today" : ""}" data-date="${col.date}" data-room="${r.id}">${parts}</div>`;
+    }).join("");
+
+    const hours = [];
+    for (let m = from; m < to; m += 60) hours.push(`<span style="top:${px(m)}px">${fromMin(m)}</span>`);
+
+    return `
+      <h1 class="page-head">Takvim</h1>
+      <p class="page-sub">Dolu ve boş saatleri görün. Boş bir saate tıklayarak o saat için talep oluşturabilirsiniz.</p>
+      <div class="cal-toolbar">
+        <div class="seg" role="group" aria-label="Görünüm">
+          <button class="${c.view === "week" ? "on" : ""}" data-view="week">${icon("ti-calendar-week")}Hafta</button>
+          <button class="${c.view === "day" ? "on" : ""}" data-view="day">${icon("ti-layout-columns")}Gün · tüm alanlar</button>
+        </div>
+        ${c.view === "week" ? `<select class="input cal-room" id="calRoom" aria-label="Alan">${db.rooms.map((r) => `<option value="${r.id}" ${r.id === c.roomId ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select>` : ""}
+        <div class="cal-nav">
+          <button class="btn btn-outline icon-btn" data-step="-1" aria-label="Önceki">${icon("ti-chevron-left")}</button>
+          <button class="btn btn-outline" data-step="0">Bugün</button>
+          <button class="btn btn-outline icon-btn" data-step="1" aria-label="Sonraki">${icon("ti-chevron-right")}</button>
+          <span class="cal-label">${label}</span>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="sw sw-ok"></i>Onaylı</span>
+        <span><i class="sw sw-pend"></i>Ön rezervasyon</span>
+        ${cols.some((col) => col.room.mode === "shared") ? `<span><i class="sw sw-load"></i>Paylaşımlı doluluk</span>` : ""}
+        <span><i class="sw sw-closed"></i>Kapalı</span>
+        <span><i class="sw sw-free"></i>Boş: tıklayın</span>
+      </div>
+      <div class="card flush"><div class="cal-scroll">
+        <div class="cal" data-from="${from}" style="--cols:${cols.length};--h:${px(to)}px">
+          <div class="cal-corner"></div>${head}
+          <div class="cal-gutter">${hours.join("")}</div>${body}
+        </div>
+      </div></div>`;
+  }
+
+  function bindCalendar() {
+    const c = ui.cal;
+    document.querySelectorAll("[data-view]").forEach((b) => b.onclick = () => { c.view = b.dataset.view; render(); });
+    $("#calRoom") && ($("#calRoom").onchange = (e) => { c.roomId = e.target.value; render(); });
+    document.querySelectorAll("[data-step]").forEach((b) => b.onclick = () => {
+      const n = +b.dataset.step;
+      c.date = n === 0 ? addDays(0) : shiftDate(c.date, n * (c.view === "week" ? 7 : 1));
+      render();
+    });
+    // Dolu blok: kendi talebine, SKS için onay kuyruğuna gider
+    document.querySelectorAll(".cal-ev").forEach((el) => el.onclick = (e) => {
+      e.stopPropagation();
+      const x = db.reservations.find((r) => r.id === el.dataset.ev);
+      if (x.owner === me().username) go("mine");
+      else if (me().role !== "USER" && x.status === "PENDING") go("approvals");
+      else toast(`${x.start}–${x.end} arası dolu.`);
+    });
+    document.querySelectorAll(".cal-load.full").forEach((el) => el.onclick = (e) => { e.stopPropagation(); toast("Bu saatte kapasite dolu."); });
+    // Boş saate tıklama: o saatle doldurulmuş talep formunu açar
+    const from = +$(".cal")?.dataset.from;
+    document.querySelectorAll(".cal-col").forEach((col) => col.onclick = (e) => {
+      const r = room(col.dataset.room), date = col.dataset.date;
+      const y = e.clientY - col.getBoundingClientRect().top;
+      const start = from + Math.floor((y * 60) / HOUR_PX / 30) * 30;
+      const day = new Date(date + "T00:00").getDay();
+      const slot = db.hours.find((h) => h.roomId === r.id && h.day === day && start >= toMin(h.open) && start < toMin(h.close));
+      const now = new Date();
+      if (db.closures.some((x) => date >= x.start && date <= x.end) || !slot) return toast("Bu saatte alan kapalı.");
+      if (date < addDays(0) || (date === addDays(0) && start < now.getHours() * 60 + now.getMinutes())) return toast("Geçmiş bir saat seçilemez.");
+      let end = Math.min(start + 60, toMin(slot.close));
+      if (r.mode === "exclusive") {
+        const next = activeOn(r.id, date).map((x) => toMin(x.start)).filter((m) => m > start);
+        if (next.length) end = Math.min(end, ...next);
+      }
+      ui.prefill = { roomId: r.id, date, start: fromMin(start), end: fromMin(end) };
+      go("new");
+    });
   }
 
   // ---------- 5. Rezervasyonlarım ----------

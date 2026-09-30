@@ -30,6 +30,11 @@ Herhangi bir şifreyle:
 3. **Feragatname** — kaydırılabilir metin, onay kutusu işaretlenmeden buton pasif
 4. **Yeni rezervasyon** — alan, tarih/başlangıç/bitiş, takım, öğrenci numarası chip girişi, sarı ön rezervasyon uyarısı,
    gönderimde yeşil başarı / kırmızı hata
+   Seçilen alan ve gün için açık saatler ile dolu aralıklar formun içinde gösterilir.
+4a. **Takvim** — *Hafta* görünümü (tek alan, 7 gün) ve *Gün · tüm alanlar* görünümü. Onaylı (yeşil), ön
+   rezervasyon (sarı, kesikli), kapalı saatler (taralı), paylaşımlı alanlarda 30 dakikalık dilimlerde doluluk
+   (ör. `12/30`, kapasite dolunca kırmızı "Dolu"). Boş bir saate tıklamak, formu o alan/gün/saatle doldurur.
+   Öğrenciler başkalarının adını görmez ("Dolu" / "Ön rezervasyon"), SKS ve Admin kişi/takım adını görür.
 5. **Rezervasyonlarım** — durum rozetli kartlar, reddedilenlerde sebep, ön rezervasyon ve onaylılarda iptal
 6. **Onaylar** — adet rozeti, Bireysel/Takım rozeti, feragatname durumu, Onayla / Reddet (sebep + Vazgeç)
 7. **İstatistik** — toplam rezervasyon ve kişi kartları, alan bazında tablo ve katılım oranı
