@@ -456,3 +456,139 @@ select.cal-room { width: auto; min-width: 200px; }
 @media (max-width: 520px) { .filters { grid-template-columns: 1fr; } }
 .plist td { white-space: normal; vertical-align: top; }
 .plist td:last-child { white-space: nowrap; }
+
+/* =========================================================
+   Sürüm 3: davetler, bildirimler, yoklama, raporlar, yönetim
+   ========================================================= */
+.wrap { white-space: normal; }
+.section-title { font-size: 15px; font-weight: 500; margin: 24px 0 10px; display: flex; align-items: center; gap: 8px; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font: inherit; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; text-align: left; }
+.linkbtn.warn { color: var(--warning); margin-top: 4px; }
+.footer a { color: var(--text-2); }
+
+/* Üst menü: bildirim zili ve dil */
+.bell { position: relative; padding: 6px 9px; min-height: 36px; }
+.bell.on { background: rgba(255, 255, 255, .12); }
+.bell .dot {
+  position: absolute; top: 2px; right: 1px; min-width: 17px; height: 17px; padding: 0 4px;
+  background: var(--brand-yellow); color: var(--brand-dark); border-radius: 999px; font-size: 11px; font-weight: 600;
+  display: grid; place-items: center; line-height: 1;
+}
+.lang { font-size: 12px; font-weight: 600; letter-spacing: .04em; min-height: 32px; padding: 4px 8px; border: 0.5px solid rgba(255, 255, 255, .35); }
+.login .lang { color: var(--brand); border-color: var(--border-strong); }
+.login-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.login-top .uni { margin: 0; }
+.demo-hint ul { margin: 6px 0 0; padding-left: 18px; }
+.demo-hint li { margin: 2px 0; }
+
+/* Ana sayfa */
+.tiles { grid-template-columns: repeat(2, 1fr); }
+.tile { min-height: 132px; }
+.invite-banner { text-decoration: none; }
+.invite-banner:hover { filter: brightness(.98); }
+
+/* Feragatname */
+.kvkk, .rules, .history, .skipped {
+  border: var(--hair); border-radius: var(--r-ctl); padding: 10px 14px; margin-bottom: 16px; background: var(--surface);
+}
+.kvkk summary, .rules summary, .history summary, .skipped summary { cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.kvkk ul, .rules ul, .history ul, .skipped ul { margin: 10px 0 4px; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; }
+.history ul { padding-left: 0; list-style: none; }
+.checks { display: grid; gap: 10px; margin-bottom: 16px; }
+.skipped { margin: 8px 0 0; background: transparent; border-color: currentColor; }
+
+/* Yeni rezervasyon */
+.room-info { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; color: var(--text-2); margin-top: 6px; }
+.room-info span { display: inline-flex; align-items: center; gap: 4px; }
+.repeat { background: var(--accent-soft); border-radius: var(--r-ctl); padding: 12px 14px; margin: -4px 0 16px; }
+.chip small { opacity: .7; font-size: 12px; margin-left: 2px; }
+.hours-list { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 4px; }
+.hours-list li { display: flex; justify-content: space-between; gap: 12px; border-bottom: var(--hair); padding: 4px 0; font-size: 14px; }
+.modal-body .label { margin-top: 10px; }
+.modal-body p { margin: 2px 0 0; }
+
+/* Detay */
+.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 20px; font-weight: 600; letter-spacing: .12em;
+  background: var(--brand-dark); color: var(--brand-yellow); border-radius: 6px; padding: 2px 10px; display: inline-block; }
+.series { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.series .current { outline: 2px solid var(--accent); outline-offset: 1px; }
+.history li { font-size: 13px; border-bottom: var(--hair); padding: 4px 0; }
+.modal.wide { max-width: 860px; }
+.modal-foot { align-items: center; }
+
+/* Onaylar */
+.bulkbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+  background: var(--surface); border: var(--hair); border-radius: var(--r-card); padding: 10px 14px; }
+.approval .top { align-items: flex-start; }
+.approval .sel { margin-top: 4px; }
+.approval.selected { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.warn-line { margin: 8px 0 0; color: var(--warning); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+
+/* Bildirimler */
+.notif { width: 100%; text-align: left; background: var(--surface); border: 0; border-bottom: var(--hair); font: inherit; color: inherit; cursor: pointer; }
+.notif:hover { background: #f8fafb; }
+.notif.unread { box-shadow: inset 3px 0 0 var(--brand-yellow); background: #fffdf5; }
+.notif .title { font-weight: 500; }
+.notif .side { text-align: right; display: grid; gap: 2px; justify-items: end; white-space: nowrap; }
+.notif .mail { display: inline-flex; gap: 3px; align-items: center; font-size: 12px; }
+.invite { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-left: 3px solid var(--brand-yellow); }
+.invite .title { font-weight: 500; }
+.invite .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
+
+/* Yoklama */
+.code-card { margin-bottom: 8px; }
+.code-row { display: flex; gap: 8px; margin: 6px 0; }
+.code-row .input { max-width: 220px; text-transform: uppercase; letter-spacing: .12em; font-size: 17px; }
+.day-nav { justify-content: space-between; flex-wrap: wrap; }
+.day-nav h2 { font-size: 15px; }
+.att-list { display: grid; gap: 6px; }
+.att { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: var(--hair); border-radius: var(--r-ctl); cursor: pointer; }
+.att input { width: 20px; height: 20px; accent-color: var(--success); flex: none; }
+.att:has(input:checked) { background: var(--success-soft); border-color: #a9dcc8; }
+.att > span:nth-child(2) { flex: 1; }
+
+/* Raporlar */
+.range { grid-template-columns: auto 1fr; align-items: center; }
+.metrics.four { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 760px) { .metrics.four { grid-template-columns: 1fr 1fr; } .range { grid-template-columns: 1fr; } }
+.report-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-top: 12px; }
+@media (max-width: 860px) { .report-grid { grid-template-columns: minmax(0, 1fr); } }
+.report-grid h2 { margin-bottom: 4px; }
+.heat-wrap { overflow-x: auto; }
+.heat { border-collapse: separate; border-spacing: 2px; width: 100%; }
+.heat th { background: none; font-weight: 400; font-size: 11px; color: var(--text-2); padding: 0 2px; text-align: center; }
+.heat tbody th { text-align: right; padding-right: 6px; }
+.heat td { height: 22px; min-width: 20px; border-radius: 3px; padding: 0; border: 0; cursor: default; }
+.heat td:hover, .heat td:focus { outline: 2px solid var(--brand-dark); outline-offset: 0; }
+.heat-scale { display: flex; align-items: center; gap: 6px; margin-top: 8px; justify-content: flex-end; }
+.heat-scale i { width: 120px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgba(0, 68, 143, .12), rgba(0, 68, 143, 1)); }
+.bars { display: grid; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 1.3fr) 2fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar { height: 10px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--brand); border-radius: 0 4px 4px 0; }
+.bar-val { font-variant-numeric: tabular-nums; color: var(--text-2); min-width: 2ch; text-align: right; }
+.tip { position: fixed; z-index: 60; background: var(--brand-dark); color: #fff; font-size: 12px; padding: 5px 9px; border-radius: 6px; pointer-events: none; white-space: nowrap; }
+.meter i { background: var(--success); }
+
+/* Takvim: özel kullanım saatleri ve yarım salon */
+.cal-aud { position: absolute; left: 0; right: 0; pointer-events: none;
+  background: repeating-linear-gradient(135deg, transparent 0 8px, rgba(0, 68, 143, .05) 8px 9px); border-top: 1.5px dotted var(--accent); }
+.cal-aud span { position: absolute; top: 2px; right: 3px; font-size: 10.5px; color: var(--accent); background: var(--accent-soft); padding: 0 6px; border-radius: 999px; }
+.cal-aud.aud-women { border-top-color: #9c3d78; }
+.cal-aud.aud-women span { color: #8a2f68; background: #f8e8f2; }
+.sw-aud { background: repeating-linear-gradient(135deg, #fff 0 3px, var(--accent-soft) 3px 5px); border: 1px dotted var(--accent); }
+.cal-ev.half-a { right: 50%; margin-right: 1px; }
+.cal-ev.half-b { left: 50%; margin-left: 1px; }
+
+/* Ufak ekranlar */
+@media (max-width: 520px) {
+  .invite .btn-row, .invite .btn-row .btn { width: 100%; }
+  .bulkbar .btn { width: 100%; }
+  .code-row .input { max-width: none; }
+  .userbox { gap: 4px; }
+}
+.metrics .card, .report-grid .card, .tiles .card { margin-top: 0; }
+.cal-ev.half-a .t, .cal-ev.half-b .t { white-space: normal; font-size: 11px; }
+.seg { max-width: 100%; flex-wrap: wrap; }
+@media (max-width: 560px) { .seg button { padding: 6px 8px; } }
